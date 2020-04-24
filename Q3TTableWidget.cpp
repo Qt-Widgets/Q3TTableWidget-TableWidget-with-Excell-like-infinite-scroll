@@ -61,6 +61,7 @@ Q3TTableWidget::Q3TTableWidget()
     model->setRowCount(10);
     model->setColumnCount(10);
     setModel(model);
+
     init();
 
     //connect the headers and scrollbars of both tableviews together
