@@ -48,18 +48,18 @@
 **
 ****************************************************************************/
 
-#ifndef Q3TTableWidge_H
-#define Q3TTableWidge_H
+#ifndef Q3TTableWidget_H
+#define Q3TTableWidget_H
 
 #include <QTableView>
 
 //! [Widget definition]
-class Q3TTableWidge : public QTableView {
+class Q3TTableWidget : public QTableView {
      Q_OBJECT
 
 public:
-      Q3TTableWidge(QAbstractItemModel * model);
-      ~Q3TTableWidge() override;
+      Q3TTableWidget();
+      ~Q3TTableWidget() override;
 
 
 protected:
@@ -79,4 +79,4 @@ private slots:
 
 };
 //! [Widget definition]
-#endif // Q3TTableWidge_H
+#endif // Q3TTableWidget_H

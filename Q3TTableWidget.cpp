@@ -52,65 +52,35 @@
 
 #include <QScrollBar>
 #include <QHeaderView>
+#include <QStandardItemModel>
 
 //! [constructor]
-Q3TTableWidget::Q3TTableWidget(QAbstractItemModel * model)
+Q3TTableWidget::Q3TTableWidget()
 {
-      setModel(model);
-      frozenTableView = new QTableView(this);
+    QStandardItemModel *model = new QStandardItemModel();
+    model->setRowCount(10);
+    model->setColumnCount(10);
+    setModel(model);
+    init();
 
-      init();
-
-      //connect the headers and scrollbars of both tableviews together
-      connect(horizontalHeader(),&QHeaderView::sectionResized, this,
-              &Q3TTableWidget::updateSectionWidth);
-      connect(verticalHeader(),&QHeaderView::sectionResized, this,
-              &Q3TTableWidget::updateSectionHeight);
-
-      connect(frozenTableView->verticalScrollBar(), &QAbstractSlider::valueChanged,
-              verticalScrollBar(), &QAbstractSlider::setValue);
-      connect(verticalScrollBar(), &QAbstractSlider::valueChanged,
-              frozenTableView->verticalScrollBar(), &QAbstractSlider::setValue);
-
-
+    //connect the headers and scrollbars of both tableviews together
+    connect(horizontalHeader(),&QHeaderView::sectionResized, this,
+          &Q3TTableWidget::updateSectionWidth);
+    connect(verticalHeader(),&QHeaderView::sectionResized, this,
+          &Q3TTableWidget::updateSectionHeight);
 }
 //! [constructor]
 
 Q3TTableWidget::~Q3TTableWidget()
 {
-      delete frozenTableView;
+
 }
 
 //! [init part1]
 void Q3TTableWidget::init()
 {
-      frozenTableView->setModel(model());
-      frozenTableView->setFocusPolicy(Qt::NoFocus);
-      frozenTableView->verticalHeader()->hide();
-      frozenTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-
-      viewport()->stackUnder(frozenTableView);
-//! [init part1]
-
-//! [init part2]
-      frozenTableView->setStyleSheet("QTableView { border: none;"
-                                     "background-color: #8EDE21;"
-                                     "selection-background-color: #999}"); //for demo purposes
-      frozenTableView->setSelectionModel(selectionModel());
-      for (int col = 1; col < model()->columnCount(); ++col)
-            frozenTableView->setColumnHidden(col, true);
-
-      frozenTableView->setColumnWidth(0, columnWidth(0) );
-
-      frozenTableView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-      frozenTableView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-      frozenTableView->show();
-
-      updateFrozenTableGeometry();
-
       setHorizontalScrollMode(ScrollPerPixel);
       setVerticalScrollMode(ScrollPerPixel);
-      frozenTableView->setVerticalScrollMode(ScrollPerPixel);
 }
 //! [init part2]
 
@@ -118,15 +88,12 @@ void Q3TTableWidget::init()
 //! [sections]
 void Q3TTableWidget::updateSectionWidth(int logicalIndex, int /* oldSize */, int newSize)
 {
-      if (logicalIndex == 0){
-            frozenTableView->setColumnWidth(0, newSize);
-            updateFrozenTableGeometry();
-      }
+
 }
 
 void Q3TTableWidget::updateSectionHeight(int logicalIndex, int /* oldSize */, int newSize)
 {
-      frozenTableView->setRowHeight(logicalIndex, newSize);
+
 }
 //! [sections]
 
@@ -135,7 +102,6 @@ void Q3TTableWidget::updateSectionHeight(int logicalIndex, int /* oldSize */, in
 void Q3TTableWidget::resizeEvent(QResizeEvent * event)
 {
       QTableView::resizeEvent(event);
-      updateFrozenTableGeometry();
  }
 //! [resize]
 
@@ -146,11 +112,9 @@ QModelIndex Q3TTableWidget::moveCursor(CursorAction cursorAction,
 {
       QModelIndex current = QTableView::moveCursor(cursorAction, modifiers);
 
-      if (cursorAction == MoveLeft && current.column() > 0
-              && visualRect(current).topLeft().x() < frozenTableView->columnWidth(0) ){
-            const int newValue = horizontalScrollBar()->value() + visualRect(current).topLeft().x()
-                                 - frozenTableView->columnWidth(0);
-            horizontalScrollBar()->setValue(newValue);
+      if (cursorAction == MoveLeft && current.column() > 0)
+      {
+
       }
       return current;
 }
@@ -164,9 +128,7 @@ void Q3TTableWidget::scrollTo (const QModelIndex & index, ScrollHint hint){
 //! [geometry]
 void Q3TTableWidget::updateFrozenTableGeometry()
 {
-      frozenTableView->setGeometry(verticalHeader()->width() + frameWidth(),
-                                   frameWidth(), columnWidth(0),
-                                   viewport()->height()+horizontalHeader()->height());
+
 }
 //! [geometry]
 

@@ -5,7 +5,9 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-
+    createWidget();
+    createLayout();
+    createConnection();
 }
 
 MainWindow::~MainWindow()
@@ -20,16 +22,15 @@ void MainWindow::createWidget()
     //把定义的QWidget设置为当前QMainWindow的主窗口
     this->setCentralWidget(m_pMainWidget);
 
-    m_pMainLayout = new QVBoxLayout(m_pMainWidget);
-    m_pTableWidget = new Q3TTableWidget(nullptr);
+    m_pTableWidget = new Q3TTableWidget();
+
     showMaximized();
 }
 
 void MainWindow::createLayout()
 {
-
-    m_pMainLayout->addWidget()
-
+    m_pMainLayout = new QVBoxLayout(m_pMainWidget);
+    m_pMainLayout->addWidget(m_pTableWidget);
     m_pMainWidget->setLayout(m_pMainLayout);
 }
 
