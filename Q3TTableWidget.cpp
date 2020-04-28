@@ -109,11 +109,15 @@ void Q3TTableWidget::resizeEvent(QResizeEvent * event)
     int oldColumnConut = m_model->columnCount();
     QModelIndex index= m_model->index(oldRowConut - 1, oldColumnConut - 1);
     QRect rect = visualRect(index);
-    int incWidth = geometry().right() - rect.right();
-    int incHeight = geometry().bottom() - rect.bottom();
 
-    int oneCellWidth = horizontalHeader()->defaultSectionSize();
-    int oneCellHeight = verticalHeader()->defaultSectionSize();
+    QRect clientRect = geometry();
+    QHeaderView* horiHV =  horizontalHeader();
+    QHeaderView* vertHV =  verticalHeader();
+    // make clientRect base (0, 0)
+    int incWidth = clientRect.right() - clientRect.left() - (rect.right() + horiHV->height());
+    int incHeight = clientRect.bottom() - clientRect.top() - (rect.bottom() + vertHV->width());
+    int oneCellWidth = horiHV->defaultSectionSize();
+    int oneCellHeight = vertHV->defaultSectionSize();
 
     int needColumnCount = static_cast<int>(ceil(static_cast<double>(incWidth)/static_cast<double>(oneCellWidth)));
     int needRowCount = static_cast<int>(ceil(static_cast<double>(incHeight)/static_cast<double>(oneCellHeight)));
