@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QLabel>
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
@@ -21,8 +22,12 @@ public:
     void createLayout();
     void createConnection();
 
+private Q_SLOTS:
+    void setRowColumnDescription(int actualRowCount, int actualColumnCount, int rowCount, int columnCount);
+
 private:
     QWidget *m_pMainWidget;
+    QLabel* m_pTableDescLabel;
     QVBoxLayout *m_pMainLayout;
     Q3TTableWidget *m_pTableWidget;
 };

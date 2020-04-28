@@ -23,6 +23,7 @@ void MainWindow::createWidget()
     this->setCentralWidget(m_pMainWidget);
 
     m_pTableWidget = new Q3TTableWidget();
+    m_pTableDescLabel = new QLabel("Table description");
 
     showMaximized();
 }
@@ -30,13 +31,21 @@ void MainWindow::createWidget()
 void MainWindow::createLayout()
 {
     m_pMainLayout = new QVBoxLayout(m_pMainWidget);
+    m_pMainLayout->addWidget(m_pTableDescLabel);
     m_pMainLayout->addWidget(m_pTableWidget);
     m_pMainWidget->setLayout(m_pMainLayout);
 }
 
 void MainWindow::createConnection()
 {
+    connect(m_pTableWidget, SIGNAL(rowColumnCountChange(int, int, int, int)), this, SLOT(setRowColumnDescription(int, int, int, int)));
+}
 
+void MainWindow::setRowColumnDescription(int actualRowCount, int actualColumnCount, int rowCount, int columnCount)
+{
+    QString str = QString("actural row: %1, actual column: %2\nrow: %3, col: %4")
+                      .arg(actualRowCount).arg(actualColumnCount).arg(rowCount).arg(columnCount);
+    m_pTableDescLabel->setText(str);
 }
 
 

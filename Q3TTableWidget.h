@@ -51,31 +51,37 @@
 #ifndef Q3TTableWidget_H
 #define Q3TTableWidget_H
 
+#include <QStandardItemModel>
 #include <QTableView>
 
 //! [Widget definition]
 class Q3TTableWidget : public QTableView {
-     Q_OBJECT
+    Q_OBJECT
 
 public:
-      Q3TTableWidget();
-      ~Q3TTableWidget() override;
+    Q3TTableWidget();
+    ~Q3TTableWidget() override;
 
 
 protected:
-      void resizeEvent(QResizeEvent *event) override;
-      QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) override;
-      void scrollTo (const QModelIndex & index, ScrollHint hint = EnsureVisible) override;
+    void resizeEvent(QResizeEvent *event) override;
+    QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) override;
+    void scrollTo (const QModelIndex & index, ScrollHint hint = EnsureVisible) override;
 
-private:
-      QTableView *frozenTableView;
-      void init();
-      void updateFrozenTableGeometry();
-
+Q_SIGNALS:
+    void rowColumnCountChange(int actualRowCount, int actualColumnCount, int rowCount, int columnCount);
 
 private slots:
-      void updateSectionWidth(int logicalIndex, int oldSize, int newSize);
-      void updateSectionHeight(int logicalIndex, int oldSize, int newSize);
+    void updateSectionWidth(int logicalIndex, int oldSize, int newSize);
+    void updateSectionHeight(int logicalIndex, int oldSize, int newSize);
+
+protected:
+    void init();
+
+private:
+    QStandardItemModel *m_model;
+    int m_actualRowCount;
+    int m_actualColumnCount;
 
 };
 //! [Widget definition]

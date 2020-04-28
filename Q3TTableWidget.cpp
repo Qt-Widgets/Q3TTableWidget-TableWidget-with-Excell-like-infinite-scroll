@@ -57,11 +57,12 @@
 //! [constructor]
 Q3TTableWidget::Q3TTableWidget()
 {
-    QStandardItemModel *model = new QStandardItemModel();
-    model->setRowCount(10);
-    model->setColumnCount(10);
-    setModel(model);
-
+    m_actualRowCount = 4;
+    m_actualColumnCount= 4;
+    m_model = new QStandardItemModel();
+    m_model->setRowCount(m_actualRowCount);
+    m_model->setColumnCount(m_actualColumnCount);
+    setModel(m_model);
     init();
 
     //connect the headers and scrollbars of both tableviews together
@@ -98,11 +99,39 @@ void Q3TTableWidget::updateSectionHeight(int logicalIndex, int /* oldSize */, in
 }
 //! [sections]
 
-
 //! [resize]
 void Q3TTableWidget::resizeEvent(QResizeEvent * event)
 {
-      QTableView::resizeEvent(event);
+    QTableView::resizeEvent(event);
+//    int lastCellX = columnViewportPosition(m_model->columnCount());
+//    int lastCellY = columnViewportPosition(m_model->rowCount());
+    int oldRowConut = m_model->rowCount();
+    int oldColumnConut = m_model->columnCount();
+    QModelIndex index= m_model->index(oldRowConut - 1, oldColumnConut - 1);
+    QRect rect = visualRect(index);
+    int incWidth = geometry().right() - rect.right();
+    int incHeight = geometry().bottom() - rect.bottom();
+
+    int oneCellWidth = horizontalHeader()->defaultSectionSize();
+    int oneCellHeight = verticalHeader()->defaultSectionSize();
+
+    int needColumnCount = static_cast<int>(ceil(static_cast<double>(incWidth)/static_cast<double>(oneCellWidth)));
+    int needRowCount = static_cast<int>(ceil(static_cast<double>(incHeight)/static_cast<double>(oneCellHeight)));
+
+    int nNewRowCount = oldRowConut;
+    if(needRowCount != 0 && oldRowConut + needRowCount > m_actualRowCount)
+    {
+        nNewRowCount = oldRowConut + needRowCount;
+        m_model->setRowCount(nNewRowCount);
+    }
+    int nNewColumnCount = oldColumnConut;
+    if(needColumnCount != 0 && oldRowConut + needColumnCount > m_actualColumnCount)
+    {
+        nNewColumnCount = oldColumnConut + needColumnCount;
+        m_model->setColumnCount(nNewColumnCount);
+    }
+
+    emit rowColumnCountChange(m_actualRowCount, m_actualColumnCount, nNewRowCount, nNewColumnCount);
  }
 //! [resize]
 
@@ -111,26 +140,19 @@ void Q3TTableWidget::resizeEvent(QResizeEvent * event)
 QModelIndex Q3TTableWidget::moveCursor(CursorAction cursorAction,
                                           Qt::KeyboardModifiers modifiers)
 {
-      QModelIndex current = QTableView::moveCursor(cursorAction, modifiers);
+    QModelIndex current = QTableView::moveCursor(cursorAction, modifiers);
 
-      if (cursorAction == MoveLeft && current.column() > 0)
-      {
+    if (cursorAction == MoveLeft && current.column() > 0)
+    {
 
-      }
-      return current;
+    }
+    return current;
 }
 //! [navigate]
 
-void Q3TTableWidget::scrollTo (const QModelIndex & index, ScrollHint hint){
-    if (index.column() > 0)
-        QTableView::scrollTo(index, hint);
-}
-
-//! [geometry]
-void Q3TTableWidget::updateFrozenTableGeometry()
+void Q3TTableWidget::scrollTo (const QModelIndex & index, ScrollHint hint)
 {
-
+QTableView::scrollTo(index, hint);
 }
-//! [geometry]
 
 
