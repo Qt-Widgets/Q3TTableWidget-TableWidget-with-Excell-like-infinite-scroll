@@ -18,12 +18,16 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void createWidget();
-    void createLayout();
-    void createConnection();
+protected:
+    QSize sizeHint() const override;
 
 private Q_SLOTS:
     void setRowColumnDescription(int actualRowCount, int actualColumnCount, int rowCount, int columnCount);
+
+public:
+    void createWidget();
+    void createLayout();
+    void createConnection();
 
 private:
     QWidget *m_pMainWidget;

@@ -15,6 +15,11 @@ MainWindow::~MainWindow()
 
 }
 
+QSize MainWindow::sizeHint() const
+{
+    return QSize(600, 400);
+}
+
 void MainWindow::createWidget()
 {
     //QMainWindow不能增加添加布局，所以先定义一个QWidget
@@ -47,5 +52,4 @@ void MainWindow::setRowColumnDescription(int actualRowCount, int actualColumnCou
                       .arg(actualRowCount).arg(actualColumnCount).arg(rowCount).arg(columnCount);
     m_pTableDescLabel->setText(str);
 }
-
 

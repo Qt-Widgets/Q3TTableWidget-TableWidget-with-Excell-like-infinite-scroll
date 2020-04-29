@@ -53,12 +53,13 @@
 #include <QScrollBar>
 #include <QHeaderView>
 #include <QStandardItemModel>
+#include <QWheelEvent>
 
-//! [constructor]
+
 Q3TTableWidget::Q3TTableWidget()
 {
-    m_actualRowCount = 4;
-    m_actualColumnCount= 4;
+    m_actualRowCount = 10;
+    m_actualColumnCount= 10;
     m_model = new QStandardItemModel();
     m_model->setRowCount(m_actualRowCount);
     m_model->setColumnCount(m_actualColumnCount);
@@ -71,23 +72,12 @@ Q3TTableWidget::Q3TTableWidget()
     connect(verticalHeader(),&QHeaderView::sectionResized, this,
           &Q3TTableWidget::updateSectionHeight);
 }
-//! [constructor]
 
 Q3TTableWidget::~Q3TTableWidget()
 {
 
 }
 
-//! [init part1]
-void Q3TTableWidget::init()
-{
-      setHorizontalScrollMode(ScrollPerPixel);
-      setVerticalScrollMode(ScrollPerPixel);
-}
-//! [init part2]
-
-
-//! [sections]
 void Q3TTableWidget::updateSectionWidth(int logicalIndex, int /* oldSize */, int newSize)
 {
 
@@ -97,14 +87,56 @@ void Q3TTableWidget::updateSectionHeight(int logicalIndex, int /* oldSize */, in
 {
 
 }
-//! [sections]
 
-//! [resize]
+
 void Q3TTableWidget::resizeEvent(QResizeEvent * event)
 {
     QTableView::resizeEvent(event);
-//    int lastCellX = columnViewportPosition(m_model->columnCount());
-//    int lastCellY = columnViewportPosition(m_model->rowCount());
+
+    resetRowColumnCountByGeometry();
+ }
+
+static const int incRowCountOneTime = 6;
+static const int incColumnCountOneTime = 4;
+void Q3TTableWidget::scrollTo(const QModelIndex & index, ScrollHint hint)
+{
+    int oldRowCount = m_model->rowCount();
+    int oldColumnConut = m_model->columnCount();
+    int newRowCount = oldRowCount;
+    if(index.row() >= oldRowCount - incRowCountOneTime)
+    {
+        newRowCount = oldRowCount + incRowCountOneTime;
+        m_model->setRowCount(newRowCount);
+    }
+    int newColumnCount = oldColumnConut;
+    if(index.column() >= oldColumnConut - incColumnCountOneTime)
+    {
+        newColumnCount = oldColumnConut + incColumnCountOneTime;
+        m_model->setColumnCount(newColumnCount);
+    }
+
+    emit rowColumnCountChange(m_actualRowCount, m_actualColumnCount, newRowCount, newColumnCount);
+
+    QTableView::scrollTo(index, hint);
+}
+
+void Q3TTableWidget::wheelEvent(QWheelEvent *event)
+{
+    if(event->delta() < 0)
+        resetRowColumnCountByGeometry(false);
+
+    QTableView::wheelEvent(event);
+}
+
+
+void Q3TTableWidget::init()
+{
+      setHorizontalScrollMode(ScrollPerPixel);
+      setVerticalScrollMode(ScrollPerPixel);
+}
+
+void Q3TTableWidget::resetRowColumnCountByGeometry(bool isDecrease)
+{
     int oldRowConut = m_model->rowCount();
     int oldColumnConut = m_model->columnCount();
     QModelIndex index= m_model->index(oldRowConut - 1, oldColumnConut - 1);
@@ -122,41 +154,18 @@ void Q3TTableWidget::resizeEvent(QResizeEvent * event)
     int needColumnCount = static_cast<int>(ceil(static_cast<double>(incWidth)/static_cast<double>(oneCellWidth)));
     int needRowCount = static_cast<int>(ceil(static_cast<double>(incHeight)/static_cast<double>(oneCellHeight)));
 
-    int nNewRowCount = oldRowConut;
-    if(needRowCount != 0 && oldRowConut + needRowCount > m_actualRowCount)
+    int newRowCount = oldRowConut;
+    if(needRowCount != 0 && (isDecrease || needRowCount + incRowCountOneTime > 0) && oldRowConut + needRowCount > m_actualRowCount)
     {
-        nNewRowCount = oldRowConut + needRowCount;
-        m_model->setRowCount(nNewRowCount);
+        newRowCount = oldRowConut + needRowCount + incRowCountOneTime;
+        m_model->setRowCount(newRowCount);
     }
-    int nNewColumnCount = oldColumnConut;
-    if(needColumnCount != 0 && oldRowConut + needColumnCount > m_actualColumnCount)
+    int newColumnCount = oldColumnConut;
+    if(needColumnCount != 0 && (isDecrease || needColumnCount + incColumnCountOneTime > 0) && oldRowConut + needColumnCount > m_actualColumnCount)
     {
-        nNewColumnCount = oldColumnConut + needColumnCount;
-        m_model->setColumnCount(nNewColumnCount);
+        newColumnCount = oldColumnConut + needColumnCount + incColumnCountOneTime;
+        m_model->setColumnCount(newColumnCount);
     }
 
-    emit rowColumnCountChange(m_actualRowCount, m_actualColumnCount, nNewRowCount, nNewColumnCount);
- }
-//! [resize]
-
-
-//! [navigate]
-QModelIndex Q3TTableWidget::moveCursor(CursorAction cursorAction,
-                                          Qt::KeyboardModifiers modifiers)
-{
-    QModelIndex current = QTableView::moveCursor(cursorAction, modifiers);
-
-    if (cursorAction == MoveLeft && current.column() > 0)
-    {
-
-    }
-    return current;
+    emit rowColumnCountChange(m_actualRowCount, m_actualColumnCount, newRowCount, newColumnCount);
 }
-//! [navigate]
-
-void Q3TTableWidget::scrollTo (const QModelIndex & index, ScrollHint hint)
-{
-QTableView::scrollTo(index, hint);
-}
-
-

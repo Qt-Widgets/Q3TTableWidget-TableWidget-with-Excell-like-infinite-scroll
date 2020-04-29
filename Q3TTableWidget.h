@@ -65,8 +65,8 @@ public:
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
-    QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) override;
     void scrollTo (const QModelIndex & index, ScrollHint hint = EnsureVisible) override;
+    void wheelEvent(QWheelEvent *) override;
 
 Q_SIGNALS:
     void rowColumnCountChange(int actualRowCount, int actualColumnCount, int rowCount, int columnCount);
@@ -77,6 +77,7 @@ private slots:
 
 protected:
     void init();
+    void resetRowColumnCountByGeometry(bool isDecrease = true);
 
 private:
     QStandardItemModel *m_model;
