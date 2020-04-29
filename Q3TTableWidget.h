@@ -54,8 +54,8 @@
 #include <QStandardItemModel>
 #include <QTableView>
 
-//! [Widget definition]
-class Q3TTableWidget : public QTableView {
+class Q3TTableWidget : public QTableView
+{
     Q_OBJECT
 
 public:
@@ -67,16 +67,17 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
     void scrollTo (const QModelIndex & index, ScrollHint hint = EnsureVisible) override;
     void wheelEvent(QWheelEvent *) override;
+    void currentChanged(const QModelIndex &current, const QModelIndex &previous) override;
 
 Q_SIGNALS:
     void rowColumnCountChange(int actualRowCount, int actualColumnCount, int rowCount, int columnCount);
 
 private slots:
-    void updateSectionWidth(int logicalIndex, int oldSize, int newSize);
-    void updateSectionHeight(int logicalIndex, int oldSize, int newSize);
+    void itemChanged(QStandardItem *item);
 
 protected:
     void init();
+    void resetRowColumnCountByModelIndex(const QModelIndex &index);
     void resetRowColumnCountByGeometry(bool isDecrease = true);
 
 private:
@@ -85,5 +86,5 @@ private:
     int m_actualColumnCount;
 
 };
-//! [Widget definition]
+
 #endif // Q3TTableWidget_H

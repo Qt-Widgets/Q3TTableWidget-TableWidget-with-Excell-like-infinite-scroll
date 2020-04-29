@@ -66,24 +66,10 @@ Q3TTableWidget::Q3TTableWidget()
     setModel(m_model);
     init();
 
-    //connect the headers and scrollbars of both tableviews together
-    connect(horizontalHeader(),&QHeaderView::sectionResized, this,
-          &Q3TTableWidget::updateSectionWidth);
-    connect(verticalHeader(),&QHeaderView::sectionResized, this,
-          &Q3TTableWidget::updateSectionHeight);
+    connect(m_model, SIGNAL(itemChanged(QStandardItem *)), this, SLOT(itemChanged(QStandardItem *)));
 }
 
 Q3TTableWidget::~Q3TTableWidget()
-{
-
-}
-
-void Q3TTableWidget::updateSectionWidth(int logicalIndex, int /* oldSize */, int newSize)
-{
-
-}
-
-void Q3TTableWidget::updateSectionHeight(int logicalIndex, int /* oldSize */, int newSize)
 {
 
 }
@@ -100,22 +86,7 @@ static const int incRowCountOneTime = 6;
 static const int incColumnCountOneTime = 4;
 void Q3TTableWidget::scrollTo(const QModelIndex & index, ScrollHint hint)
 {
-    int oldRowCount = m_model->rowCount();
-    int oldColumnConut = m_model->columnCount();
-    int newRowCount = oldRowCount;
-    if(index.row() >= oldRowCount - incRowCountOneTime)
-    {
-        newRowCount = oldRowCount + incRowCountOneTime;
-        m_model->setRowCount(newRowCount);
-    }
-    int newColumnCount = oldColumnConut;
-    if(index.column() >= oldColumnConut - incColumnCountOneTime)
-    {
-        newColumnCount = oldColumnConut + incColumnCountOneTime;
-        m_model->setColumnCount(newColumnCount);
-    }
-
-    emit rowColumnCountChange(m_actualRowCount, m_actualColumnCount, newRowCount, newColumnCount);
+    resetRowColumnCountByModelIndex(index);
 
     QTableView::scrollTo(index, hint);
 }
@@ -128,11 +99,54 @@ void Q3TTableWidget::wheelEvent(QWheelEvent *event)
     QTableView::wheelEvent(event);
 }
 
+void Q3TTableWidget::currentChanged(const QModelIndex &current, const QModelIndex &previous)
+{
+    resetRowColumnCountByModelIndex(current);
+
+    QTableView::currentChanged(current, previous);
+}
+
+void Q3TTableWidget::itemChanged(QStandardItem *item)
+{
+    if(item->row() >= m_actualRowCount)
+        m_actualRowCount = item->row() + 1;
+    if(item->column() >= m_actualColumnCount)
+        m_actualColumnCount = item->column() + 1;
+
+    emit rowColumnCountChange(m_actualRowCount, m_actualColumnCount, m_model->rowCount(), m_model->columnCount());
+}
+
 
 void Q3TTableWidget::init()
 {
       setHorizontalScrollMode(ScrollPerPixel);
       setVerticalScrollMode(ScrollPerPixel);
+}
+
+void Q3TTableWidget::resetRowColumnCountByModelIndex(const QModelIndex &index)
+{
+    int oldRowCount = m_model->rowCount();
+    int oldColumnConut = m_model->columnCount();
+    bool isChange = false;
+    int newRowCount = oldRowCount;
+    if(index.row() >= oldRowCount - incRowCountOneTime)
+    {
+        newRowCount = oldRowCount + incRowCountOneTime;
+        m_model->setRowCount(newRowCount);
+        isChange = true;
+    }
+    int newColumnCount = oldColumnConut;
+    if(index.column() >= oldColumnConut - incColumnCountOneTime)
+    {
+        newColumnCount = oldColumnConut + incColumnCountOneTime;
+        m_model->setColumnCount(newColumnCount);
+        isChange = true;
+    }
+
+    if(isChange)
+    {
+        emit rowColumnCountChange(m_actualRowCount, m_actualColumnCount, newRowCount, newColumnCount);
+    }
 }
 
 void Q3TTableWidget::resetRowColumnCountByGeometry(bool isDecrease)
@@ -155,13 +169,13 @@ void Q3TTableWidget::resetRowColumnCountByGeometry(bool isDecrease)
     int needRowCount = static_cast<int>(ceil(static_cast<double>(incHeight)/static_cast<double>(oneCellHeight)));
 
     int newRowCount = oldRowConut;
-    if(needRowCount != 0 && (isDecrease || needRowCount + incRowCountOneTime > 0) && oldRowConut + needRowCount > m_actualRowCount)
+    if((isDecrease || needRowCount + incRowCountOneTime > 0) && oldRowConut + needRowCount > m_actualRowCount)
     {
         newRowCount = oldRowConut + needRowCount + incRowCountOneTime;
         m_model->setRowCount(newRowCount);
     }
     int newColumnCount = oldColumnConut;
-    if(needColumnCount != 0 && (isDecrease || needColumnCount + incColumnCountOneTime > 0) && oldRowConut + needColumnCount > m_actualColumnCount)
+    if((isDecrease || needColumnCount + incColumnCountOneTime > 0) && oldColumnConut + needColumnCount > m_actualColumnCount)
     {
         newColumnCount = oldColumnConut + needColumnCount + incColumnCountOneTime;
         m_model->setColumnCount(newColumnCount);
