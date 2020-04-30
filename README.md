@@ -1,3 +1,2 @@
 # Q3TTableWidget
-Qt table like Excel, matlab 
-can auto increase row column size
+Qt table view(widget) like Excel, matlab, auto increase row column count, infinete count
